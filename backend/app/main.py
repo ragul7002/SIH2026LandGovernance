@@ -20,6 +20,9 @@ from app.api.datasets import router as datasets_router
 from app.api.evidence import router as evidence_router
 from app.api.reports import router as reports_router
 from app.api.taluks import router as taluks_router
+from app.api.parcels import router as parcels_router
+from app.api.villages import router as villages_router
+from app.api.authorized_access import router as authorized_access_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -41,6 +44,9 @@ app.add_middleware(
 # Mount API Routers
 app.include_router(regions_router, prefix=settings.API_V1_STR)
 app.include_router(taluks_router, prefix=settings.API_V1_STR)
+app.include_router(villages_router, prefix=settings.API_V1_STR)
+app.include_router(parcels_router, prefix=settings.API_V1_STR)
+app.include_router(authorized_access_router, prefix=settings.API_V1_STR)
 app.include_router(lulc_router, prefix=settings.API_V1_STR)
 app.include_router(gis_router, prefix=settings.API_V1_STR)
 app.include_router(predictions_router, prefix=settings.API_V1_STR)

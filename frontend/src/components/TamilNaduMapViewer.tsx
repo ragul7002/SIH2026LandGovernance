@@ -12,6 +12,7 @@ import {
   Sparkles,
   ChevronDown
 } from 'lucide-react';
+import { KolamCorner } from './common/TraditionalMotifs';
 
 interface TamilNaduMapViewerProps {
   districts: District[];
@@ -24,7 +25,6 @@ interface TamilNaduMapViewerProps {
 }
 
 // Convert lon/lat to SVG coordinates (Width 600, Height 750)
-// Tamil Nadu: lon ~ 76.2 to 80.4, lat ~ 8.0 to 13.6
 function projectCoord(lon: number, lat: number): [number, number] {
   const minLon = 76.1;
   const maxLon = 80.4;
@@ -41,7 +41,6 @@ function getDistrictPath(d: District): string {
   const [cx, cy] = projectCoord(d.lon || 77.5, d.lat || 11.0);
   const r = Math.max(22, Math.min(48, Math.round(Math.sqrt(d.area_sqkm) * 0.45)));
 
-  // Generate 8-point polygon with slight natural variations
   const points: [number, number][] = [];
   const numPoints = 8;
   const seed = (d.id.charCodeAt(0) + d.id.charCodeAt(d.id.length - 1)) % 5;
@@ -69,20 +68,22 @@ export const TamilNaduMapViewer: React.FC<TamilNaduMapViewerProps> = ({
   const [hoveredDistrict, setHoveredDistrict] = useState<District | null>(null);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+    <div className="bg-[#FAF9F5] rounded-2xl border border-[#E2DDD5] shadow-2xs p-6 space-y-6 relative overflow-hidden">
+      <KolamCorner position="top-right" size={36} opacity={0.15} color="#9E3A26" className="absolute top-2 right-2" />
+
       {/* Top Header & Dropdown Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2DDD5]">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-            <h2 className="text-lg font-bold text-slate-900">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#2D5A3D] animate-pulse" />
+            <h2 className="text-lg font-heading font-extrabold text-[#1F2421]">
               Tamil Nadu State Map (38 Districts)
             </h2>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-              Interactive Vector Boundary Map
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#9E3A26]/10 text-[#9E3A26] border border-[#9E3A26]/20">
+              Interactive Boundary Map
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#5E6460] mt-0.5">
             Hover and click any district to inspect, or pick a district and area directly from the dropdown below.
           </p>
         </div>
@@ -91,157 +92,121 @@ export const TamilNaduMapViewer: React.FC<TamilNaduMapViewerProps> = ({
         {selectedDistrict && (
           <button
             onClick={() => onSelectDistrict(null as any)}
-            className="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition-colors self-start"
+            className="px-3 py-1.5 rounded-lg border border-[#E2DDD5] hover:bg-[#F5F2EA] text-[#1F2421] text-xs font-semibold flex items-center space-x-1.5 transition-all self-start"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#9E3A26]" />
             <span>Reset Map View</span>
           </button>
         )}
       </div>
 
-      {/* Dropdown Selection Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-        {/* Dropdown 1: District */}
+      {/* Dropdown Selectors */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-[#E2DDD5] text-xs">
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 block">
+          <label className="font-bold text-[#1F2421] block">
             1. Select District ({districts.length} Districts):
           </label>
-          <div className="relative">
-            <select
-              value={selectedDistrict?.id || ''}
-              onChange={(e) => {
-                const d = districts.find((dist) => dist.id === e.target.value);
-                if (d) onSelectDistrict(d);
-              }}
-              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 shadow-2xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden cursor-pointer"
-            >
-              <option value="">-- Choose a District --</option>
-              {districts.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} {d.pilot_focus ? '★ (Active Pilot)' : ''} ({d.region} Region)
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Dropdown 2: Area / Taluk */}
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 block">
-            2. Select Area / Taluk in {selectedDistrict ? selectedDistrict.name : 'District'}:
-          </label>
-          <div className="relative">
-            <select
-              value={selectedTaluk}
-              onChange={(e) => onSelectTaluk(e.target.value)}
-              disabled={!selectedDistrict}
-              className={`w-full border rounded-lg px-3 py-2 text-xs font-semibold shadow-2xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden cursor-pointer ${
-                selectedDistrict
-                  ? 'bg-white border-slate-300 text-slate-800'
-                  : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              <option value="">
-                {selectedDistrict ? `-- All Areas in ${selectedDistrict.name} --` : '-- Select a District First --'}
+          <select
+            value={selectedDistrict?.id || ''}
+            onChange={(e) => {
+              const d = districts.find((dist) => dist.id === e.target.value);
+              if (d) onSelectDistrict(d);
+              onSelectTaluk('');
+            }}
+            className="w-full bg-[#FAF9F5] border border-[#E2DDD5] rounded-lg px-3 py-2 font-semibold text-[#1F2421] focus:ring-1 focus:ring-[#9E3A26] focus:outline-hidden cursor-pointer"
+          >
+            <option value="">-- Choose from 38 Districts --</option>
+            {districts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name} ({d.region} Region)
               </option>
-              {selectedDistrict?.taluks?.map((tname) => (
-                <option key={tname} value={tname}>
-                  {tname} Taluk
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </select>
         </div>
 
-        {/* Status Indicator */}
-        <div className="flex flex-col justify-center space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Selection</span>
-          <div className="text-xs font-bold text-slate-900 truncate">
-            {selectedDistrict ? `${selectedDistrict.name} District` : 'Whole Tamil Nadu'}
-            {selectedTaluk ? ` → ${selectedTaluk}` : ''}
-          </div>
+        <div className="space-y-1">
+          <label className="font-bold text-[#1F2421] block">
+            2. Select Area / Taluk:
+          </label>
+          <select
+            value={selectedTaluk}
+            onChange={(e) => onSelectTaluk(e.target.value)}
+            disabled={!selectedDistrict}
+            className={`w-full border rounded-lg px-3 py-2 font-semibold focus:ring-1 focus:ring-[#9E3A26] focus:outline-hidden cursor-pointer ${
+              selectedDistrict
+                ? 'bg-[#FAF9F5] border-[#E2DDD5] text-[#1F2421]'
+                : 'bg-[#F5F2EA] border-[#E2DDD5] text-[#858B87] cursor-not-allowed'
+            }`}
+          >
+            <option value="">
+              {selectedDistrict ? `-- All Areas in ${selectedDistrict.name} --` : '-- Choose a District First --'}
+            </option>
+            {selectedDistrict?.taluks?.map((tname) => (
+              <option key={tname} value={tname}>
+                {tname} Taluk
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Main Map + District Card Layout */}
+      {/* Main Grid: SVG Map Left (8 cols) + Info Right (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left 8 cols: 3D-styled Tamil Nadu Vector Map */}
-        <div className="lg:col-span-7 xl:col-span-8 bg-slate-100/70 rounded-2xl border border-slate-200 p-4 flex flex-col items-center justify-center relative overflow-hidden shadow-inner min-h-[560px]">
-          {/* Subtle Background Badge */}
-          <div className="absolute top-4 left-4 z-10 flex items-center space-x-1.5 text-xs text-slate-500 font-semibold bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
-            <Compass className="w-4 h-4 text-blue-700" />
-            <span>Click any district to inspect</span>
-          </div>
-
-          {/* SVG Vector Map of Tamil Nadu */}
+        {/* Left: SVG Map Canvas */}
+        <div className="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl border border-[#E2DDD5] p-4 flex flex-col items-center justify-center relative overflow-hidden shadow-2xs min-h-[580px]">
           <svg
             viewBox="0 0 600 750"
-            className="w-full max-w-[500px] h-auto drop-shadow-xl transition-all duration-300"
-            style={{ filter: 'drop-shadow(0 15px 25px rgba(15, 23, 42, 0.15))' }}
+            className="w-full max-w-[500px] h-auto drop-shadow-xs select-none"
           >
-            <defs>
-              <linearGradient id="districtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f8fafc" />
-                <stop offset="100%" stopColor="#e2e8f0" />
-              </linearGradient>
-              <linearGradient id="selectedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1e3a8a" />
-                <stop offset="100%" stopColor="#172554" />
-              </linearGradient>
-              <linearGradient id="pilotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#1d4ed8" />
-              </linearGradient>
-              <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
-                <feDropShadow dx="1" dy="2" stdDeviation="1.5" floodOpacity="0.12" />
-              </filter>
-            </defs>
-
-            {/* Render each district polygon with separated border lines */}
-            <g id="tamil-nadu-districts">
+            {/* Background State Outline */}
+            <g id="state-districts">
               {districts.map((d) => {
                 const isSelected = selectedDistrict?.id === d.id;
                 const isHovered = hoveredDistrict?.id === d.id;
-                const isPilot = d.pilot_focus;
+                const pathStr = getDistrictPath(d);
                 const [cx, cy] = projectCoord(d.lon || 77.5, d.lat || 11.0);
-                const pathData = getDistrictPath(d);
 
                 return (
-                  <g key={d.id} className="cursor-pointer group">
+                  <g
+                    key={d.id}
+                    className="cursor-pointer transition-transform duration-150"
+                    onMouseEnter={() => setHoveredDistrict(d)}
+                    onMouseLeave={() => setHoveredDistrict(null)}
+                    onClick={() => {
+                      onSelectDistrict(d);
+                      onSelectTaluk('');
+                    }}
+                  >
                     <path
-                      d={pathData}
+                      d={pathStr}
                       fill={
                         isSelected
-                          ? 'url(#selectedGradient)'
-                          : isPilot
-                          ? 'url(#pilotGradient)'
+                          ? '#9E3A26'
                           : isHovered
-                          ? '#cbd5e1'
-                          : 'url(#districtGradient)'
+                          ? '#FDF8EE'
+                          : '#FAF9F5'
                       }
-                      stroke={isSelected ? '#0f172a' : '#94a3b8'}
-                      strokeWidth={isSelected ? '2.5' : '1.2'}
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                      filter="url(#subtleShadow)"
-                      className="transition-all duration-200"
-                      onMouseEnter={() => setHoveredDistrict(d)}
-                      onMouseLeave={() => setHoveredDistrict(null)}
-                      onClick={() => onSelectDistrict(d)}
+                      stroke={
+                        isSelected
+                          ? '#7F2A19'
+                          : isHovered
+                          ? '#B58D3D'
+                          : '#D8D2C6'
+                      }
+                      strokeWidth={isSelected ? '2.5' : isHovered ? '2' : '1'}
+                      className="transition-colors duration-150"
                     />
-
-                    {/* Centered District Label */}
                     <text
                       x={cx}
                       y={cy}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fontSize={isSelected || isPilot ? '9' : '7.5'}
-                      fontWeight={isSelected || isPilot ? 'bold' : '600'}
-                      fill={isSelected || isPilot ? '#ffffff' : '#334155'}
-                      className="pointer-events-none select-none tracking-tight"
+                      fontSize={isSelected ? '9' : '7.5'}
+                      fontWeight={isSelected ? 'bold' : '600'}
+                      fill={isSelected ? '#FFFFFF' : '#1F2421'}
+                      className="pointer-events-none select-none tracking-tight font-sans"
                     >
-                      {d.name.length > 9 ? d.name.substring(0, 8) + '..' : d.name}
+                      {d.name.length > 8 ? d.name.substring(0, 7) + '..' : d.name}
                     </text>
                   </g>
                 );
@@ -251,77 +216,77 @@ export const TamilNaduMapViewer: React.FC<TamilNaduMapViewerProps> = ({
 
           {/* Hover Tooltip Overlay */}
           {hoveredDistrict && (
-            <div className="absolute bottom-4 right-4 z-20 bg-slate-900 text-white text-xs p-3 rounded-xl shadow-lg border border-slate-700 pointer-events-none space-y-1">
-              <div className="font-bold text-sm text-emerald-400">{hoveredDistrict.name} District</div>
-              <div className="text-[11px] text-slate-300">
+            <div className="absolute bottom-4 right-4 z-20 bg-[#FAF9F5]/95 backdrop-blur-md text-[#1F2421] text-xs p-3 rounded-xl shadow-lg border border-[#E2DDD5] pointer-events-none space-y-1">
+              <div className="font-heading font-bold text-sm text-[#9E3A26]">{hoveredDistrict.name} District</div>
+              <div className="text-[11px] text-[#5E6460]">
                 {hoveredDistrict.region} Region • {hoveredDistrict.area_sqkm.toLocaleString()} km²
               </div>
-              <div className="text-[11px] text-slate-400">
+              <div className="text-[11px] text-[#858B87]">
                 Pop: {(hoveredDistrict.population / 100000).toFixed(1)} Lakhs • {hoveredDistrict.urban_pct}% Urban
               </div>
             </div>
           )}
         </div>
 
-        {/* Right 5/4 cols: Selected District Profile Card & Action Panel */}
+        {/* Right: Selected District Profile Card */}
         <div className="lg:col-span-5 xl:col-span-4 space-y-4">
           {selectedDistrict ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="bg-white rounded-2xl border border-[#E2DDD5] p-5 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E2DDD5] pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#9E3A26]">
                     Selected District
                   </span>
-                  <h3 className="text-xl font-black text-slate-900">
+                  <h3 className="text-xl font-heading font-black text-[#1F2421]">
                     {selectedDistrict.name}
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#9E3A26]/10 text-[#9E3A26] border border-[#9E3A26]/20">
                   {selectedDistrict.region} TN
                 </span>
               </div>
 
               {/* Description */}
-              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <p className="text-xs text-[#5E6460] leading-relaxed bg-[#FAF9F5] p-3 rounded-lg border border-[#E2DDD5]">
                 {selectedDistrict.description}
               </p>
 
               {/* Statistics Grid */}
               <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 text-[10px] block font-semibold">Total Area</span>
-                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                <div className="p-3 bg-[#FAF9F5] rounded-lg border border-[#E2DDD5]">
+                  <span className="text-[#858B87] text-[10px] block font-semibold">Total Area</span>
+                  <div className="text-base font-bold text-[#1F2421] font-mono mt-0.5">
                     {selectedDistrict.area_sqkm.toLocaleString()} km²
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 text-[10px] block font-semibold">Total Population</span>
-                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                <div className="p-3 bg-[#FAF9F5] rounded-lg border border-[#E2DDD5]">
+                  <span className="text-[#858B87] text-[10px] block font-semibold">Total Population</span>
+                  <div className="text-base font-bold text-[#1F2421] font-mono mt-0.5">
                     {(selectedDistrict.population / 100000).toFixed(1)} Lakhs
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 text-[10px] block font-semibold">Urban Share</span>
-                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                <div className="p-3 bg-[#FAF9F5] rounded-lg border border-[#E2DDD5]">
+                  <span className="text-[#858B87] text-[10px] block font-semibold">Urban Share</span>
+                  <div className="text-base font-bold text-[#2D5A3D] font-mono mt-0.5">
                     {selectedDistrict.urban_pct}%
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 text-[10px] block font-semibold">Headquarters</span>
-                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                <div className="p-3 bg-[#FAF9F5] rounded-lg border border-[#E2DDD5]">
+                  <span className="text-[#858B87] text-[10px] block font-semibold">Headquarters</span>
+                  <div className="text-base font-bold text-[#1F2421] mt-0.5">
                     {selectedDistrict.hq}
                   </div>
                 </div>
               </div>
 
               {/* Sub-Areas / Taluks in this District */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-800 flex items-center justify-between">
-                  <span>Taluks / Areas ({selectedDistrict.taluks?.length || 0})</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Click dropdown above to focus</span>
+              <div className="space-y-2 pt-2 border-t border-[#E2DDD5]">
+                <span className="text-xs font-bold text-[#1F2421] flex items-center justify-between">
+                  <span>Taluks in {selectedDistrict.name} ({selectedDistrict.taluks?.length || 0})</span>
+                  <span className="text-[10px] text-[#858B87] font-normal">Click dropdown above to focus</span>
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedDistrict.taluks?.map((tname) => {
@@ -332,8 +297,8 @@ export const TamilNaduMapViewer: React.FC<TamilNaduMapViewerProps> = ({
                         onClick={() => onSelectTaluk(tname)}
                         className={`text-[11px] px-2.5 py-1 rounded-md font-semibold transition-all ${
                           isTalukActive
-                            ? 'bg-blue-800 text-white shadow-2xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            ? 'bg-[#9E3A26] text-white shadow-2xs font-bold'
+                            : 'bg-[#FAF9F5] text-[#1F2421] border border-[#E2DDD5] hover:bg-[#F5F2EA]'
                         }`}
                       >
                         {tname}
@@ -344,29 +309,29 @@ export const TamilNaduMapViewer: React.FC<TamilNaduMapViewerProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="pt-3 border-t border-[#E2DDD5] space-y-2">
                 <button
                   onClick={onOpenGisMicroView}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center space-x-2"
+                  className="w-full py-2.5 bg-[#2D5A3D] hover:bg-[#1F432B] text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center justify-center space-x-2"
                 >
                   <MapPin className="w-4 h-4" />
-                  <span>Open Satellite Street View & Risk Parcels</span>
+                  <span>Open GIS Explorer &amp; Risk Parcels</span>
                 </button>
 
                 <button
                   onClick={onOpenResearch}
-                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
+                  className="w-full py-2 bg-[#F5F2EA] hover:bg-[#EFECE6] text-[#1F2421] border border-[#E2DDD5] rounded-lg text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
                 >
-                  <Info className="w-3.5 h-3.5 text-blue-700" />
-                  <span>Ask AI Policy Copilot for {selectedDistrict.name}</span>
+                  <Info className="w-3.5 h-3.5 text-[#9E3A26]" />
+                  <span>Ask Research Copilot for {selectedDistrict.name}</span>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3 shadow-xs">
-              <Compass className="w-10 h-10 text-blue-400 mx-auto" />
-              <h3 className="text-base font-bold text-slate-900">Select Any District</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+            <div className="bg-white rounded-2xl border border-[#E2DDD5] p-8 text-center space-y-3 shadow-2xs">
+              <Compass className="w-10 h-10 text-[#B58D3D] mx-auto" />
+              <h3 className="text-base font-heading font-bold text-[#1F2421]">Select Any District</h3>
+              <p className="text-xs text-[#5E6460] leading-relaxed">
                 Click any of the 38 districts on the map or use the dropdown to inspect area statistics, taluks, and land-use pressure.
               </p>
             </div>

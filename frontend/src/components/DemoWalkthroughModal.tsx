@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavTab } from './Sidebar';
-import { CheckCircle2, ChevronRight, ChevronLeft, X, Sparkles, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ChevronRight, ChevronLeft, X, Sparkles } from 'lucide-react';
+import { TamilEmblemBadge, KolamCorner } from './common/TraditionalMotifs';
 
 interface DemoWalkthroughModalProps {
   isOpen: boolean;
@@ -178,72 +179,74 @@ export const DemoWalkthroughModal: React.FC<DemoWalkthroughModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-[#1F2421]/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-[#FAF9F5] rounded-2xl shadow-2xl border border-[#E2DDD5] max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-[#FAF9F5] border-b border-[#E2DDD5] flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
+            <TamilEmblemBadge size={32} />
             <div>
-              <h2 className="text-sm font-bold tracking-tight">Interactive SIH 2026 Demo Tour</h2>
-              <p className="text-[11px] text-slate-300">Step {currentStep.step} of 15: {currentStep.title}</p>
+              <h2 className="text-sm font-heading font-bold text-[#1F2421]">Interactive SIH 2026 Demo Tour</h2>
+              <p className="text-[11px] text-[#5E6460]">Step {currentStep.step} of 15: {currentStep.title}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
+            className="text-[#858B87] hover:text-[#1F2421] p-1 rounded-md transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Step Progress Bar */}
-        <div className="w-full bg-slate-100 h-1.5">
+        <div className="w-full bg-[#EFECE6] h-1.5">
           <div
-            className="bg-emerald-600 h-1.5 transition-all duration-300"
+            className="bg-[#9E3A26] h-1.5 transition-all duration-300"
             style={{ width: `${((currentStepIdx + 1) / DEMO_STEPS.length) * 100}%` }}
           />
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="p-6 overflow-y-auto space-y-4 bg-white relative">
+          <KolamCorner position="top-right" size={40} opacity={0.2} color="#9E3A26" className="absolute top-2 right-2" />
+
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#9E3A26]/12 text-[#9E3A26] border border-[#9E3A26]/20">
               STEP {currentStep.step}
             </span>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#5E6460] uppercase tracking-wider">
               Target View: {currentStep.tab.replace('_', ' ').toUpperCase()}
             </span>
           </div>
 
-          <h3 className="text-lg font-bold text-slate-900 leading-tight">
+          <h3 className="text-lg font-heading font-bold text-[#1F2421] leading-tight">
             {currentStep.promptText}
           </h3>
 
-          <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed">
-            <p className="font-medium mb-1 text-slate-900">What is happening here:</p>
-            {currentStep.explanation}
+          <div className="p-3.5 bg-[#FAF9F5] rounded-lg border border-[#E2DDD5] text-xs text-[#1F2421] leading-relaxed">
+            <p className="font-bold mb-1 text-[#9E3A26]">What is happening here:</p>
+            <p className="text-[#383C39]">{currentStep.explanation}</p>
           </div>
 
-          <div className="flex items-center space-x-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="flex items-center space-x-2 p-3 bg-[#2D5A3D]/10 rounded-lg border border-[#2D5A3D]/25 text-xs text-[#1F432B]">
+            <CheckCircle2 className="w-4 h-4 text-[#2D5A3D] shrink-0" />
             <span><strong>Suggested Action:</strong> {currentStep.actionHint}</span>
           </div>
 
           {/* Quick Jump Step Dots */}
-          <div className="pt-2 border-t border-slate-100">
-            <p className="text-[10px] text-slate-400 mb-2 font-semibold uppercase tracking-wider">Jump to Step:</p>
+          <div className="pt-2 border-t border-[#E2DDD5]">
+            <p className="text-[10px] text-[#5E6460] mb-2 font-bold uppercase tracking-wider">Jump to Step:</p>
             <div className="flex flex-wrap gap-1.5">
               {DEMO_STEPS.map((s, idx) => (
                 <button
                   key={s.step}
                   onClick={() => handleJumpToStep(idx)}
-                  className={`w-7 h-7 text-xs font-semibold rounded-md flex items-center justify-center transition-colors ${
+                  className={`w-7 h-7 text-xs font-semibold rounded-md flex items-center justify-center transition-all ${
                     idx === currentStepIdx
-                      ? 'bg-blue-800 text-white font-bold ring-2 ring-blue-400'
+                      ? 'bg-[#9E3A26] text-white font-bold ring-2 ring-[#9E3A26]/40 shadow-xs'
                       : idx < currentStepIdx
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-[#2D5A3D]/15 text-[#2D5A3D] font-medium'
+                      : 'bg-[#F5F2EA] text-[#5E6460] hover:bg-[#EFECE6]'
                   }`}
                 >
                   {s.step}
@@ -254,27 +257,27 @@ export const DemoWalkthroughModal: React.FC<DemoWalkthroughModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <div className="px-6 py-3.5 bg-[#FAF9F5] border-t border-[#E2DDD5] flex items-center justify-between">
           <button
             onClick={handlePrev}
             disabled={isFirst}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${
               isFirst
-                ? 'opacity-40 cursor-not-allowed border-slate-200 text-slate-400'
-                : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                ? 'opacity-40 cursor-not-allowed border-[#E2DDD5] text-[#858B87]'
+                : 'border-[#E2DDD5] text-[#1F2421] bg-[#F5F2EA] hover:bg-[#EFECE6]'
             }`}
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Previous</span>
           </button>
 
-          <div className="text-xs text-slate-400 font-mono">
+          <div className="text-xs text-[#5E6460] font-mono">
             {currentStepIdx + 1} / {DEMO_STEPS.length}
           </div>
 
           <button
             onClick={handleNext}
-            className="flex items-center space-x-1.5 px-4 py-1.5 text-xs font-semibold rounded-md bg-blue-800 hover:bg-blue-900 text-white transition-colors shadow-xs"
+            className="flex items-center space-x-1.5 px-4 py-1.5 text-xs font-bold rounded-md bg-[#9E3A26] hover:bg-[#7F2A19] text-white transition-all shadow-xs"
           >
             <span>{isLast ? 'Complete Tour' : 'Next Step'}</span>
             {!isLast && <ChevronRight className="w-4 h-4" />}

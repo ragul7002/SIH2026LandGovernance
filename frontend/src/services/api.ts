@@ -124,9 +124,74 @@ export const api = {
     return fetchJson<any>(`/taluks/industry-suitability?district=${encodeURIComponent(district)}&taluk=${encodeURIComponent(taluk)}&industry=${encodeURIComponent(industry)}`);
   },
 
+  // Authentic Villages (LGD 15,179 Villages)
+  getVillages: (district?: string, taluk?: string, search?: string, limit: number = 100) => {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (taluk) params.append('taluk', taluk);
+    if (search) params.append('q', search);
+    params.append('limit', String(limit));
+    return fetchJson<any>(`/villages?${params.toString()}`);
+  },
+
+  // Cadastral Land Parcels & Parcel Intelligence (TNGIS / Tamil Nilam)
+  getParcels: (district?: string, taluk?: string, village?: string, limit: number = 400) => {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (taluk) params.append('taluk', taluk);
+    if (village) params.append('village', village);
+    params.append('limit', String(limit));
+    return fetchJson<any>(`/parcels?${params.toString()}`);
+  },
+  getParcelIntelligence: (surveyNo: string, district?: string, taluk?: string, village?: string) => {
+    const params = new URLSearchParams();
+    params.append('survey_no', surveyNo);
+    if (district) params.append('district', district);
+    if (taluk) params.append('taluk', taluk);
+    if (village) params.append('village', village);
+    return fetchJson<any>(`/parcels/intelligence?${params.toString()}`);
+  },
+  searchParcels: (query: string, district?: string, taluk?: string) => {
+    const params = new URLSearchParams();
+    params.append('q', query);
+    if (district) params.append('district', district);
+    if (taluk) params.append('taluk', taluk);
+    return fetchJson<any>(`/parcels/search?${params.toString()}`);
+  },
+
   // Executive Report
   generateReport: (scenarioId: string, focusTaluk: string, userRole: string) => fetchJson<ExecutiveReport>('/generate-report', {
     method: 'POST',
     body: JSON.stringify({ scenario_id: scenarioId, focus_taluk: focusTaluk, user_role: userRole })
-  })
+  }),
+
+  // Authorized Access (Land & Property Intelligence)
+  getAuthorizationStatus: (role: string = 'Public User') => {
+    return fetchJson<any>(`/authorized/status?role=${encodeURIComponent(role)}`);
+  },
+  getAuthorizedLandRecord: (surveyNo: string, district?: string, taluk?: string, village?: string, role: string = 'Authorized User') => {
+    const params = new URLSearchParams();
+    params.append('survey_no', surveyNo);
+    if (district) params.append('district', district);
+    if (taluk) params.append('taluk', taluk);
+    if (village) params.append('village', village);
+    params.append('role', role);
+    return fetchJson<any>(`/authorized/land-records?${params.toString()}`);
+  },
+  calculateStampDuty: (guidelineValueInr: number, considerationValueInr?: number, propertyType?: string) => {
+    return fetchJson<any>('/authorized/stamp-duty-calc', {
+      method: 'POST',
+      body: JSON.stringify({
+        guideline_value_inr: guidelineValueInr,
+        consideration_value_inr: considerationValueInr,
+        property_type: propertyType || 'Agricultural'
+      })
+    });
+  },
+  recordAuditLog: (entry: { user_role: string; survey_no: string; district: string; taluk: string; village: string; access_type: string; data_source: string; status: string; reason: string; }) => {
+    return fetchJson<any>('/authorized/audit-log', {
+      method: 'POST',
+      body: JSON.stringify(entry)
+    });
+  }
 };

@@ -947,11 +947,26 @@
       .filter(Boolean)
       .join(" · ");
     var area = F.area && props[F.area] ? Math.round(Number(props[F.area])) : null;
-    // The parcel's coordinates come from its polygon geometry, surfaced here via
-    // the clicked/centroid point Leaflet hands us. There is no lat/lng attribute.
     var lat = latlng && latlng.lat != null ? Number(latlng.lat) : null;
     var lng = latlng && latlng.lng != null ? Number(latlng.lng) : null;
     var coordStr = lat != null ? lat.toFixed(6) + ", " + lng.toFixed(6) : "";
+
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'VF_PARCEL_SELECT',
+          survey_no: survey,
+          district: props[F.district] || (view.d ? view.d.n : ''),
+          taluk: props[F.mandal] || (view.m ? view.m.n : ''),
+          village: props[F.village] || (view.v ? view.v.n : ''),
+          area_sqm: area,
+          lat: lat,
+          lng: lng,
+          properties: props
+        }, '*');
+      }
+    } catch (e) {}
+
     var wrap = el("div", "vpop cad-pop");
     wrap.setAttribute("dir", I18N.dirOf(LANG));
     wrap.addEventListener("click", function (ev) {
